@@ -1,0 +1,21 @@
+{
+  "name": "common-linode-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child-process": "^1.0.2",
+    "crypto": "^1.0.1",
+    "node-fetch": "^2.6.1",
+    "NodeSSH": "github:VanCoding/NodeSSH",
+    "request": "^2.88.2",
+    "sequest": "^0.11.0",
+    "ssh2": "^1.11.0"
+  }
+}
