@@ -2,11 +2,14 @@ const os = require("os");
 
 console.log(os.hostname());
 
-// Importing the required modules
-const WebSocketServer = require("ws");
+const http = require("http");
+const WebSocket = require("ws");
 
-// Creating a new websocket server
-const wss = new WebSocketServer.Server({ port: 3000 || process.env.PORT });
+const server = http.createServer((req, res) => {
+  res.end("I am a WebSocket server");
+});
+
+const wss = new WebSocket.Server({ server });
 
 //ADMIN STUFF
 var firebase = require("firebase");
@@ -26,7 +29,6 @@ firebase.initializeApp({
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 var db = firebase.database();
-var ref = db.ref("users");
 // Attach an asynchronous callback to read the data at our posts reference
 /*
 ref.on(
@@ -776,4 +778,8 @@ wss.on("connection", (ws) => {
     console.log("Some Error occurred");
   };
 });
-console.log("The WebSocket server is running on port " + port);
+console.log("The WebSocket server is running");
+
+server.listen(3000, () => {
+  console.log("WebSocket server listening on port 3000");
+});
