@@ -16,6 +16,7 @@ const command1 = spawn(
     "--standalone",
     "-d",
     LINODE_HOSTNAME,
+    "lilshake@rocketnetworking.net",
   ],
   {
     shell: true,
