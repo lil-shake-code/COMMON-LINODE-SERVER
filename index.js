@@ -81,7 +81,7 @@ function Broadcast() {
     }
   }
 
-  setTimeout(Broadcast, 1000 / 60);
+  setTimeout(Broadcast, 1000 / 30);
 }
 Broadcast();
 
