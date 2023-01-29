@@ -6,20 +6,14 @@ const http = require("http");
 const WebSocket = require("ws");
 
 const server = http.createServer((req, res) => {
-  res.end("I am a WebSocket server");
+  res.end("I am your friendly Rocket Networking server :)");
 });
 
 const wss = new WebSocket.Server({ server });
 
 //ADMIN STUFF
 var firebase = require("firebase");
-// Fetch the service account key JSON file contents
-//var serviceAccount = require("../Firebase Admin Service Key/rocket-networking-bbd09d08f49c.json");
-/*
-const { stringify } = require("querystring");
-const { count } = require("console");
-const { isNull } = require("util");
-*/
+
 // Initialize the app with a service account, granting admin privileges
 firebase.initializeApp({
   //: admin.credential.cert(serviceAccount),
@@ -29,23 +23,11 @@ firebase.initializeApp({
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 var db = firebase.database();
-// Attach an asynchronous callback to read the data at our posts reference
-/*
-ref.on(
-  "value",
-  (snapshot) => {
-    //console.log(snapshot.val());
-  },
-  (errorObject) => {
-    console.log("The read failed: " + errorObject.name);
-  }
-);
-*/
 
 /*
  * Takes in uuid and returns the JSON associated with it on firebase
  */
-function getServerInfo(uuid) {
+async function getServerInfo(uuid) {
   var ref = db.ref("users/" + uuid);
   var finalValue = -1;
   // Attach an asynchronous callback to read the data at our posts reference
@@ -345,7 +327,7 @@ wss.on("connection", (ws) => {
   ws.isClosed = false;
 
   //when the client sends us a message
-  ws.on("message", (data) => {
+  ws.on("message", async (data) => {
     // console.log(`Client has sent us: ${data}`);
     var realData = JSON.parse(data);
     switch (realData.eventName) {
@@ -366,7 +348,7 @@ wss.on("connection", (ws) => {
 
         //check if this is a real uid/serverid or not
         const providedUid = realData.serverId;
-        const serverInfo = getServerInfo(providedUid);
+        const serverInfo = await getServerInfo(providedUid);
         console.log(serverInfo);
         if (serverInfo != -1) {
           //the provided uid is real
