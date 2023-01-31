@@ -31,7 +31,7 @@ async function getServerInfo(uuid) {
   var ref = db.ref("users/" + uuid);
   var finalValue = -1;
   // Attach an asynchronous callback to read the data at our posts reference
-  ref.on(
+  await ref.once(
     "value",
     (snapshot) => {
       // console.log(snapshot)
@@ -45,7 +45,7 @@ async function getServerInfo(uuid) {
   if (!finalValue) {
     finalValue = -1;
   }
-
+  console.log("getserverinfo function has returned a value");
   return finalValue;
 }
 
@@ -332,7 +332,7 @@ wss.on("connection", (ws) => {
     var realData = JSON.parse(data);
     switch (realData.eventName) {
       case "join_server":
-        console.log(data);
+        console.log(realData);
         //clientId++; EXPERIMENTAL CUT
 
         //VALIDATIONS
@@ -348,7 +348,8 @@ wss.on("connection", (ws) => {
 
         //check if this is a real uid/serverid or not
         const providedUid = realData.serverId;
-        const serverInfo = await getServerInfo(providedUid);
+        var serverInfo = await getServerInfo(providedUid);
+        console.log("serverInfo is");
         console.log(serverInfo);
         if (serverInfo != -1) {
           //the provided uid is real
@@ -427,7 +428,7 @@ wss.on("connection", (ws) => {
           sendAlertToClient(
             ws,
             "show",
-            "Invalid Server ID. Please make sure this is your Server ID shown on the website "
+            "Invalid Server ID. Please make sure this is your Server ID shown on the website! "
           );
         }
 
@@ -587,7 +588,7 @@ wss.on("connection", (ws) => {
               sendAlertToClient(
                 ws,
                 "show",
-                "Invalid Server ID. Please make sure this is your Server ID shown on the website "
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website2 "
               );
             }
           }
@@ -634,7 +635,7 @@ wss.on("connection", (ws) => {
               sendAlertToClient(
                 ws,
                 "show",
-                "Invalid Server ID. Please make sure this is your Server ID shown on the website "
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website3 "
               );
             }
           }
@@ -660,7 +661,7 @@ wss.on("connection", (ws) => {
               sendAlertToClient(
                 ws,
                 "show",
-                "Invalid Server ID. Please make sure this is your Server ID shown on the website "
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website4"
               );
             }
           }
@@ -704,7 +705,7 @@ wss.on("connection", (ws) => {
               sendAlertToClient(
                 ws,
                 "show",
-                "Invalid Server ID. Please make sure this is your Server ID shown on the website "
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website5 "
               );
             }
           }
