@@ -631,7 +631,7 @@ wss.on("connection", (ws) => {
               }
             } else {
               //invalid uid
-              console.log("INVALID USER ID");
+              console.log("INVALID USER ID in state update");
               sendAlertToClient(
                 ws,
                 "unshow",
