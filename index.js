@@ -634,7 +634,7 @@ wss.on("connection", (ws) => {
               console.log("INVALID USER ID");
               sendAlertToClient(
                 ws,
-                "show",
+                "unshow",
                 "Invalid Server ID. Please make sure this is your Server ID shown on the website3 "
               );
             }
