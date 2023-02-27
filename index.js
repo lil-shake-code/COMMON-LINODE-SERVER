@@ -345,7 +345,7 @@ wss.on("connection", (ws) => {
             }
           }
         }
-
+        console.log("made it through all validations");
         //check if this is a real uid/serverid or not
         const providedUid = realData.serverId;
         var serverInfo = await getServerInfo(providedUid);
@@ -391,6 +391,7 @@ wss.on("connection", (ws) => {
               );
             }
           } else {
+            console.log("creating new server on nodejs");
             //this server needs to be just started
 
             var server = new Server(providedUid, serverInfo.maxClients);
@@ -631,7 +632,9 @@ wss.on("connection", (ws) => {
               }
             } else {
               //invalid uid
-              console.log("INVALID USER ID in state update");
+              console.log(
+                "INVALID USER ID in state update or net yet created this customer's server on node"
+              );
               sendAlertToClient(
                 ws,
                 "unshow",
