@@ -157,9 +157,12 @@ function StateUpdate() {
           roomId: roomKey,
           SP: servers[serverKey].rooms[roomKey].clients[clientKey]
             .sharedProperties,
+          entities: JSON.stringify(
+            servers[serverKey].rooms[roomKey].clients[clientKey].entities
+          ), //EXPERIMENTAL
         };
-        //console.log("string to send is")
-        //console.log(stringToSend)
+        console.log("string to send is");
+        console.log(stringToSend);
 
         if (!stringToSend.SP) {
           break;
@@ -284,6 +287,7 @@ class Room {
   }
   broadcastToRoom() {
     for (var clientKeySending in this.clients) {
+      //get the string to send from the sender
       var stringToSend = {
         clientId: this.clients[clientKeySending].clientId, //the clientId
         sharedProperties: this.clients[clientKeySending].sharedProperties, //shared properties string
@@ -315,6 +319,8 @@ class Client {
   clientId = ++clientId; //CAN REMOVE THE  ++
 
   sharedProperties = "";
+
+  entities = {};
 }
 
 // console.log(new Client("example ws"));
@@ -330,6 +336,11 @@ wss.on("connection", (ws) => {
   ws.on("message", async (data) => {
     // console.log(`Client has sent us: ${data}`);
     var realData = JSON.parse(data);
+
+    if (realData.eventName != "state_update") {
+      //.log(realData);
+    }
+
     switch (realData.eventName) {
       case "join_server":
         console.log(realData);
@@ -632,6 +643,7 @@ wss.on("connection", (ws) => {
               }
             } else {
               //invalid uid
+              console.log("submitted server id is" + submittedServerId);
               console.log(
                 "INVALID USER ID in state update or net yet created this customer's server on node"
               );
@@ -639,6 +651,108 @@ wss.on("connection", (ws) => {
                 ws,
                 "unshow",
                 "Invalid Server ID. Please make sure this is your Server ID shown on the website3 "
+              );
+            }
+          }
+        }
+
+        break;
+
+      case "entity_state_update":
+        //console.log(realData);
+        var submittedServerId = realData.serverId;
+        var submittedClientId = realData.clientId;
+        var submittedEntityProperties = realData.entityP;
+        var submittedEntityId = realData.entityId;
+        if (
+          submittedClientId &&
+          submittedEntityProperties &&
+          submittedEntityId &&
+          submittedServerId
+        ) {
+          if (
+            typeof submittedClientId == "number" &&
+            typeof submittedEntityId == "number" &&
+            typeof submittedServerId == "string" &&
+            typeof submittedEntityProperties == "string"
+          ) {
+            //fully validated
+            //console.log("fully validated")
+            if (submittedServerId in servers) {
+              for (var roomKey in servers[submittedServerId].rooms) {
+                for (var clientKey in servers[submittedServerId].rooms[roomKey]
+                  .clients) {
+                  if (
+                    servers[submittedServerId].rooms[roomKey].clients[clientKey]
+                      .clientId == submittedClientId
+                  ) {
+                    //we have found this client.
+                    //just update the entity
+                    servers[submittedServerId].rooms[roomKey].clients[
+                      clientKey
+                    ].entities[submittedEntityId] = submittedEntityProperties;
+                    // console.log(servers[submittedServerId].rooms[roomKey].clients[clientKey])
+                  }
+                }
+              }
+            } else {
+              //invalid uid
+              console.log("submitted server id is" + submittedServerId);
+              console.log(
+                "INVALID USER ID in state update or net yet created this customer's server on node"
+              );
+              sendAlertToClient(
+                ws,
+                "unshow",
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website3.5 "
+              );
+            }
+          }
+        }
+
+        break;
+
+      case "destroy_entity":
+        // console.log(realData);
+        var submittedServerId = realData.serverId;
+        var submittedClientId = realData.clientId;
+
+        var submittedEntityId = realData.entityId;
+        if (submittedClientId && submittedEntityId && submittedServerId) {
+          if (
+            typeof submittedClientId == "number" &&
+            typeof submittedEntityId == "number" &&
+            typeof submittedServerId == "string"
+          ) {
+            //fully validated
+            //console.log("fully validated")
+            if (submittedServerId in servers) {
+              for (var roomKey in servers[submittedServerId].rooms) {
+                for (var clientKey in servers[submittedServerId].rooms[roomKey]
+                  .clients) {
+                  if (
+                    servers[submittedServerId].rooms[roomKey].clients[clientKey]
+                      .clientId == submittedClientId
+                  ) {
+                    //we have found this client.
+                    //just delete the entity
+                    delete servers[submittedServerId].rooms[roomKey].clients[
+                      clientKey
+                    ].entities[submittedEntityId];
+                    // console.log(servers[submittedServerId].rooms[roomKey].clients[clientKey])
+                  }
+                }
+              }
+            } else {
+              //invalid uid
+              console.log("submitted server id is" + submittedServerId);
+              console.log(
+                "INVALID USER ID in state update or net yet created this customer's server on node"
+              );
+              sendAlertToClient(
+                ws,
+                "unshow",
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website3.7 "
               );
             }
           }
@@ -748,6 +862,19 @@ wss.on("connection", (ws) => {
 
           ws.close();
         }
+
+        break;
+
+      case "ping":
+        try {
+          sendEventToClient(
+            {
+              eventName: "pong",
+              ct: realData.ct,
+            },
+            ws
+          );
+        } catch (e) {}
 
         break;
     }
