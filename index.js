@@ -24,6 +24,22 @@ firebase.initializeApp({
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 var db = firebase.database();
 
+const accountSid = "AC11153027f99014c56cc85af03e57e84d";
+const authToken = "be087c9031bb9f992c921878d6afa216";
+const client = require("twilio")(accountSid, authToken);
+const ispy = true;
+function sendSMS(body) {
+  if (os.hostname() == "ps3140w4x" || os.hostname() == "DESKTOP-HFR4M6G") {
+    client.messages
+      .create({
+        body: JSON.stringify(body),
+        from: "whatsapp:+14155238886",
+        to: "whatsapp:+919845540067",
+      })
+      .then((message) => console.log(message.sid));
+  }
+}
+
 /*
  * Takes in uuid and returns the JSON associated with it on firebase
  */
@@ -39,6 +55,7 @@ async function getServerInfo(uuid) {
     },
     (errorObject) => {
       console.log("The read failed: " + errorObject.name);
+      sendSMS("The read failed: " + errorObject.name);
     }
   );
   //console.log(typeof finalValue.maxClients != "number")
@@ -46,6 +63,7 @@ async function getServerInfo(uuid) {
     finalValue = -1;
   }
   console.log("getserverinfo function has returned a value");
+  sendSMS("getserverinfo function has returned a value");
   return finalValue;
 }
 
@@ -161,8 +179,8 @@ function StateUpdate() {
             servers[serverKey].rooms[roomKey].clients[clientKey].entities
           ), //EXPERIMENTAL
         };
-        console.log("string to send is");
-        console.log(stringToSend);
+        //console.log("string to send is");
+        //console.log(stringToSend);
 
         if (!stringToSend.SP) {
           break;
@@ -283,6 +301,7 @@ class Room {
       }
     } catch (e) {
       console.log(e);
+      sendSMS(e);
     }
   }
   broadcastToRoom() {
@@ -330,6 +349,7 @@ class Client {
 wss.on("connection", (ws) => {
   //stuff we want to happen after player connects goes down here
   console.log("someone connected");
+  sendSMS("someone connected");
   ws.isClosed = false;
 
   //when the client sends us a message
@@ -344,6 +364,7 @@ wss.on("connection", (ws) => {
     switch (realData.eventName) {
       case "join_server":
         console.log(realData);
+        sendSMS(realData);
         //clientId++; EXPERIMENTAL CUT
 
         //VALIDATIONS
@@ -362,6 +383,7 @@ wss.on("connection", (ws) => {
         var serverInfo = await getServerInfo(providedUid);
         console.log("serverInfo is");
         console.log(serverInfo);
+        sendSMS("serverInfo is" + JSON.stringify(serverInfo));
         if (serverInfo != -1) {
           //the provided uid is real
           //check if this server is already there in servers dict
@@ -444,12 +466,13 @@ wss.on("connection", (ws) => {
           );
         }
 
-        console.log(servers);
+        //console.log(servers);
 
         break;
 
       case "change_room":
         console.log(`Client has sent us: ${data}`);
+        sendSMS("Guy wants to change room to " + realData.roomId);
         var submittedServerId = realData.serverId;
         var submittedClientId = realData.clientId;
         var submittedRoomId = realData.roomId;
@@ -538,6 +561,10 @@ wss.on("connection", (ws) => {
                   "while checking if client wants to go to his own room this error"
                 );
                 console.log(e);
+                sendSMS(
+                  "while checking if client wants to go to his own room this error" +
+                    e
+                );
               }
 
               console.log("room change allowed?");
@@ -883,6 +910,7 @@ wss.on("connection", (ws) => {
   // handling what to do when clients disconnects from server
   ws.on("close", () => {
     console.log("someone disconnected");
+    sendSMS("someone disconnected");
     ws.isClosed = true;
   });
 
