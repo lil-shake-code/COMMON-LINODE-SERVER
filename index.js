@@ -739,6 +739,76 @@ wss.on("connection", (ws) => {
 
         break;
 
+      case "SMTC":
+        //console.log(realData);
+        var submittedServerId = realData.serverId;
+        var submittedClientId = realData.clientId;
+        var submittedReceiverClientId = realData.RclientId;
+        var submittedMessage = realData.message;
+        if (
+          submittedClientId &&
+          submittedServerId &&
+          submittedReceiverClientId &&
+          submittedMessage
+        ) {
+          if (
+            typeof submittedClientId == "number" &&
+            typeof submittedReceiverClientId == "number" &&
+            typeof submittedServerId == "string" &&
+            typeof submittedMessage == "string"
+          ) {
+            //fully validated
+            //console.log("fully validated")
+            if (submittedServerId in servers) {
+              for (var roomKey in servers[submittedServerId].rooms) {
+                for (var clientKey in servers[submittedServerId].rooms[roomKey]
+                  .clients) {
+                  if (
+                    servers[submittedServerId].rooms[roomKey].clients[clientKey]
+                      .clientId == submittedClientId
+                  ) {
+                    //we have found this client.
+                    // now send message to reciever
+                    for (var roomKey2 in servers[submittedServerId].rooms) {
+                      //in all rooms
+                      if (
+                        servers[submittedServerId].rooms[roomKey2].clients[
+                          submittedReceiverClientId
+                        ]
+                      ) {
+                        //if the reciever is in this room
+                        sendEventToClient(
+                          {
+                            eventName: "SMTC",
+                            message: submittedMessage,
+                            senderClientId: submittedClientId,
+                          },
+                          servers[submittedServerId].rooms[roomKey2].clients[
+                            submittedReceiverClientId
+                          ].socket
+                        );
+                      }
+                    }
+                  }
+                }
+              }
+            } else {
+              //invalid uid
+              console.log("submitted server id is" + submittedServerId);
+              console.log(
+                "INVALID USER ID in state update or net yet created this customer's server on node"
+              );
+              sendAlertToClient(
+                ws,
+                "unshow",
+                "Invalid Server ID. Please make sure this is your Server ID shown on the website3.5 "
+              );
+            }
+          }
+        }
+
+        break;
+
       case "destroy_entity":
         // console.log(realData);
         var submittedServerId = realData.serverId;
