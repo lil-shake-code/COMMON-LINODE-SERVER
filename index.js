@@ -4,11 +4,17 @@ console.log(os.hostname());
 
 const http = require("http");
 const WebSocket = require("ws");
+//allow cors
+const cors = require("cors");
+const express = require("express");
+const app = express();
+app.use(cors());
 
-const server = http.createServer((req, res) => {
-  res.end("I am your friendly Rocket Networking server :)");
+const server = http.createServer(app);
+//res.end
+app.get("/", (req, res) => {
+  res.end("I am your friendly Rocket Networking server!");
 });
-
 const wss = new WebSocket.Server({ server });
 
 //ADMIN STUFF
